@@ -13,13 +13,14 @@ You need:
 
 ## Installing on Xenial
 
-clone mdonahoe/untrunc
-cd untrunc
-./compile.sh
+    git clone git@github.com:mdonahoe/untrunc.git
+    cd untrunc
+    ./compile.sh
 
 
 ## Running
-./untrunc <ok.mp4> <corrupted.mp4>
+
+    ./untrunc <ok.mp4> <corrupted.mp4>
 
 This will create corrupted.mp4_fixed.mp4
 
