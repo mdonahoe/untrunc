@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <string>
+#include <stdint.h>
 
 
 class Atom;
@@ -40,7 +41,7 @@ public:
 
     Codec();
 
-    bool parse(Atom *trak, std::vector<int> &offsets, Atom *mdat);
+    bool parse(Atom *trak, std::vector<int64_t> &offsets, Atom *mdat);
     void clear();
 
     bool matchSample(const unsigned char *start, int maxlength);
@@ -64,7 +65,7 @@ public:
     std::vector<int> times;
     std::vector<int> keyframes; // 0 based!
     std::vector<int> sizes;
-    std::vector<int> offsets;   // Should be 64-bit!
+    std::vector<int64_t> offsets;    // XXX
 
     Track();
 
@@ -79,7 +80,7 @@ protected:
     std::vector<int> getSampleTimes  (Atom *t);
     std::vector<int> getKeyframes    (Atom *t);
     std::vector<int> getSampleSizes  (Atom *t);
-    std::vector<int> getChunkOffsets (Atom *t);
+    std::vector<int64_t> getChunkOffsets (Atom *t);
     std::vector<int> getSampleToChunk(Atom *t, int nchunks);
 
     void saveSampleTimes();

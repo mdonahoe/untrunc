@@ -486,7 +486,7 @@ void Codec::clear() {
 	mask0   = 0;
 }
 
-bool Codec::parse(Atom *trak, vector<int> &offsets, Atom *mdat) {
+bool Codec::parse(Atom *trak, vector<int64_t> &offsets, Atom *mdat) {
 	Atom *stsd = trak->atomByName("stsd");
 	if(!stsd) {
 		cerr << "Missing 'Sample Descriptions' atom (stsd).\n";
@@ -965,7 +965,7 @@ bool Track::parse(Atom *t, Atom *mdat) {
 	keyframes = getKeyframes  (t);
 	sizes     = getSampleSizes(t);
 
-	vector<int> chunk_offsets   = getChunkOffsets(t);
+	vector<int64_t> chunk_offsets   = getChunkOffsets(t);
 	vector<int> sample_to_chunk = getSampleToChunk(t, chunk_offsets.size());
 
 	if(times.size() != sizes.size()) {
@@ -1179,9 +1179,9 @@ vector<int> Track::getSampleSizes(Atom *t) {
 	return sample_sizes;
 }
 
-vector<int> Track::getChunkOffsets(Atom *t) {
+vector<int64_t> Track::getChunkOffsets(Atom *t) {
 	assert(t != NULL);
-	vector<int> chunk_offsets;
+	vector<int64_t> chunk_offsets;
 	// Chunk offsets.
 	Atom *stco = t->atomByName("stco");
 	if(stco) {
@@ -1306,28 +1306,22 @@ void Track::saveSampleToChunk() {
 }
 
 void Track::saveChunkOffsets() {
-	if(!trak)
+	if(!trak) {
+		cout << "no trak" << endl;
 		return;
-	Atom *co64 = trak->atomByName("co64");
-	if(co64) {
-		trak->prune("co64");
-		Atom *stbl = trak->atomByName("stbl");
-		if(stbl) {
-			Atom *new_stco = new Atom;
-			memcpy(new_stco->name, "stco", min(sizeof("stco"), sizeof(new_stco->name)-1));
-			stbl->children.push_back(new_stco);
-		}
 	}
-	Atom *stco = trak->atomByName("stco");
-	assert(stco);
-	if(!stco)
+	Atom *co64 = trak->atomByName("co64");
+	assert(co64);
+	if(!co64) {
+		cout << "no co64" << endl;
 		return;
-	stco->content.resize(4 +                //version
+	}
+	co64->content.resize(4 +                //version
 						 4 +                //number of entries
-						 4*offsets.size());
-	stco->writeInt(offsets.size(), 4);
+						 8*offsets.size());
+	co64->writeInt(offsets.size(), 4);
 	for(unsigned int i = 0; i < offsets.size(); i++)
-		stco->writeInt(offsets[i], 8 + 4*i);
+		co64->writeInt64(offsets[i], 8 + 8*i);
 }
 
 // vim:set ts=4 sw=4 sts=4 noet:
